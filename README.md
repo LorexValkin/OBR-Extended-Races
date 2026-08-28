@@ -27,9 +27,8 @@ join, and female Dremora because hers are filed under a voice folder only
 faction membership selects. This plugin points each race at its own recordings,
 keeps the generic playable-race grunts (which have no audio for these races)
 out of their selection pool, and the UE4SS mod keeps a female Dremora on her
-alt-voice recordings. It does not put anybody on a borrowed voice: the audio is
-keyed by race, so a race with nothing recorded (Sheogorath) stays silent rather
-than sounding like someone else.
+alt-voice recordings. Sheogorath has no combat recordings at all, so he borrows
+Imperial's the same way the shipped Dark Elves borrow High Elf's.
 
 ## Install
 
@@ -191,10 +190,10 @@ entirely. Change race before uninstalling, or keep a save from before.
   the game name Imperial and none names these four for the player. It is what
   makes the tutorial completable at all. Your own race's lines still work where
   any exist; Imperial's are added, not substituted.
-- **Sheogorath has no combat voice.** Hit and power-attack grunts come from
-  race-keyed dialogue records, and no recording of Sheogorath making those
-  sounds exists anywhere in the game. He fights in silence. Dark Seducer,
-  Golden Saint and Dremora use their own recordings.
+- **Sheogorath fights with Imperial's voice.** No hit or power-attack
+  recording of him exists anywhere in the game, so his race is pointed at
+  Imperial's, the way the shipped Dark Elves are pointed at High Elf's.
+  Dark Seducer, Golden Saint and Dremora use their own recordings.
 - **Stagger grunts are silent for all four.** The Wwise bank declares the switch
   value for each of them and then leaves the branch empty, which is a decision
   in the shipped audio rather than a missing key. Breathing, fatigue and

@@ -16,7 +16,7 @@ Built against [b]Oblivion Remastered 1.512.105[/b].
 
 [b]Horns.[/b] Dremora get a [b]Horns[/b] row in the character creator, above Hair Style, with four horn sets and "None". Horns sit in a head slot of their own, so you keep your hairstyle, beard and moustache.
 
-[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear — the Isles races because theirs are locked behind a faction no player can join, female Dremora because hers are filed under a voice folder the player never gets. This mod points each race at its own recordings. Nobody is put on a borrowed voice: the audio is keyed by race, so a race with nothing recorded (Sheogorath) stays silent rather than sounding like someone else.
+[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear — the Isles races because theirs are locked behind a faction no player can join, female Dremora because hers are filed under a voice folder the player never gets. This mod points each race at its own recordings. Sheogorath has no combat recordings at all, so he borrows Imperial's the same way the shipped Dark Elves borrow High Elf's.
 
 [b]First person works.[/b] These races were never meant to be seen from the inside. Their skin materials were missing the game's first-person clipping fix and two of the bodies cull at the camera, so near a wall your gauntlets would drift off your hands and the hands would vanish into the wall. Both are handled at runtime; the arms keep the race's own skin.
 
@@ -59,7 +59,7 @@ The three UE4SS mods ship an [b]enabled.txt[/b], so they start automatically —
 [*][b]Dremora female and Sheogorath have fixed faces.[/b] Their head meshes ship without the face-morph curve set, so the game itself cannot pose them. Nothing short of new head art changes that.
 [*][b]Dremora female gets one horn set.[/b] Only one of the shipped horn meshes is skinned to the female head; the other three are male-only.
 [*][b]Nobody reacts to you as a Dremora.[/b] Race-specific lines for these races don't exist; you get Imperial's. Your own race's lines still play wherever any exist.
-[*][b]Sheogorath has no combat voice.[/b] No hit or power-attack recording of him exists in the game.
+[*][b]Sheogorath fights with Imperial's voice.[/b] No hit or power-attack recording of him exists in the game, so his race is pointed at Imperial's.
 [*][b]Stagger grunts are silent for all four.[/b] The shipped audio declares the branch for each of them and leaves it empty. Breathing, fatigue and footsteps are normal.
 [*][b]Another mod that makes further races playable will break the numbering[/b] — race ids are positions in the alphabetical playable list. That shows up as the wrong race being applied, not a crash.
 [*][b]Horn menu tiles borrow Argonian icons.[/b] The shipped horn art has no menu portraits.
