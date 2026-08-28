@@ -1,0 +1,74 @@
+[size=5][b]Extended Races[/b][/size]
+[size=3]Dark Seducer, Golden Saint, Dremora and Sheogorath — playable, with their own voices, horns and a first-person pass[/size]
+
+Four races the game already models but never lets you pick, added to character creation. Not copies: these are the real race records, so you are the same Dremora the game's Dremora are, with their stats, bodies, faces and recordings.
+
+Built against [b]Oblivion Remastered 1.512.105[/b].
+
+[size=4][b]What you get[/b][/size]
+
+[list]
+[*][b]Dark Seducer[/b] — male and female, full face sliders
+[*][b]Golden Saint[/b] — male and female, full face sliders
+[*][b]Dremora[/b] — male and female (male has face sliders; the female head ships without morph data, so her face is fixed)
+[*][b]Sheogorath[/b] — male only, fixed face
+[/list]
+
+[b]Horns.[/b] Dremora get a [b]Horns[/b] row in the character creator, above Hair Style, with four horn sets and "None". Horns sit in a head slot of their own, so you keep your hairstyle, beard and moustache.
+
+[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear — the Isles races because theirs are locked behind a faction no player can join, female Dremora because hers are filed under a voice folder the player never gets. This mod points each race at its own recordings. Nobody is put on a borrowed voice: the audio is keyed by race, so a race with nothing recorded (Sheogorath) stays silent rather than sounding like someone else.
+
+[b]First person works.[/b] These races were never meant to be seen from the inside. Their skin materials were missing the game's first-person clipping fix and two of the bodies cull at the camera, so near a wall your gauntlets would drift off your hands and the hands would vanish into the wall. Both are handled at runtime; the arms keep the race's own skin.
+
+[b]The tutorial can be completed.[/b] Race-gated dialogue only names the ten vanilla races. Without a match, Valen Dreth never taunts you and you cannot leave the Imperial Prison. The four races answer to Imperial's race conditions (player only), so everything race-gated behaves as it does for an Imperial.
+
+[size=4][b]Requirements[/b][/size]
+
+[b]UE4SS — required, and not only for cosmetics.[/b] The plugin and pak make the races selectable, but the shipping executable cannot carry a character of any of them into the world: the character-creation Confirm handler looks the race name up in a ten-entry table compiled into the binary and dereferences the miss. Confirming a Dark Seducer, Golden Saint, Dremora or Sheogorath [b]crashes the game[/b] without the bundled [b]OBRPlayableRaces[/b] mod, which rebuilds that table at startup. No pak or plugin can do that.
+
+Get UE4SS from [url=https://github.com/UE4SS-RE/RE-UE4SS/releases]RE-UE4SS releases[/url]. Tested against [b]v3.0.1[/b]. Nothing else is needed — no script extender, no OBSE.
+
+[size=4][b]Install[/b][/size]
+
+Drop the three folders from the archive onto [b]OblivionRemastered\[/b], keeping the structure:
+
+[code]OblivionRemastered\
+  ObvData\Data\ExtendedRaces.esp
+  Content\Paks\~mods\zz_ExtendedRaces_P.pak   (+ .ucas, .utoc — all three are required)
+  Binaries\Win64\ue4ss\Mods\OBRPlayableRaces\
+  Binaries\Win64\ue4ss\Mods\OBRDremoraHorns\
+  Binaries\Win64\ue4ss\Mods\OBRFirstPersonSkin\[/code]
+
+Then add the plugin to your load order. In [b]OblivionRemastered\Content\Dev\ObvData\Data\Plugins.txt[/b], put
+
+[code]ExtendedRaces.esp[/code]
+
+[b]after AltarESPMain.esp[/b] (and any other Altar*.esp). That is not optional: AltarESPMain.esp overrides 14 of the 15 race records itself, so a plugin loading before it silently loses.
+
+The three UE4SS mods ship an [b]enabled.txt[/b], so they start automatically — you do not need to edit mods.txt. If you have edited UE4SS-settings.ini, these must stay on under [Hooks]: HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
+
+[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If that line is missing, UE4SS is not loading the mod — do not create a character, it will crash.
+
+[size=4][b]Saves[/b][/size]
+
+[b]Safe to add to an existing save. Not safe to remove from one if your character is one of the four races.[/b] The plugin only overrides records that already exist and creates no new forms, so adding it is safe, and so is removing it from a character of a vanilla race. But the engine identifies races by their position in the playable list, so a save made as one of the four resolves correctly only while the mod is installed. Change race before uninstalling, or keep a save from before.
+
+[size=4][b]Known limitations[/b][/size]
+
+[list]
+[*][b]Dremora female and Sheogorath have fixed faces.[/b] Their head meshes ship without the face-morph curve set, so the game itself cannot pose them. Nothing short of new head art changes that.
+[*][b]Dremora female gets one horn set.[/b] Only one of the shipped horn meshes is skinned to the female head; the other three are male-only.
+[*][b]Nobody reacts to you as a Dremora.[/b] Race-specific lines for these races don't exist; you get Imperial's. Your own race's lines still play wherever any exist.
+[*][b]Sheogorath has no combat voice.[/b] No hit or power-attack recording of him exists in the game.
+[*][b]Stagger grunts are silent for all four.[/b] The shipped audio declares the branch for each of them and leaves it empty. Breathing, fatigue and footsteps are normal.
+[*][b]Another mod that makes further races playable will break the numbering[/b] — race ids are positions in the alphabetical playable list. That shows up as the wrong race being applied, not a crash.
+[*][b]Horn menu tiles borrow Argonian icons.[/b] The shipped horn art has no menu portraits.
+[/list]
+
+[size=4][b]Compatibility[/b][/size]
+
+The plugin overrides the four RACE records, three Dremora HAIR records, three EYES records, and the combat-dialogue quests Generic, GenericFodderCombat, GenericDremora and SENQDGeneric plus 15 of SENQDGeneric's combat INFOs. Anything else that edits those records will conflict in the usual load-order way. The pak adds rows and new assets only; it overrides no shipped package. The UE4SS mods touch the player only.
+
+[size=4][b]How it was built[/b][/size]
+
+Everything in the archive is generated from the game's own data; nothing is hand-edited binary. Every fix here was measured against the shipping executable and packages rather than assumed — the crash, the race numbering, the dialogue gating, the combat-voice selection and the first-person clipping fix were each traced to a specific mechanism before being fixed. The OBRPlayableRaces DLL verifies each engine structure before writing to it and, on a build it does not recognise, logs and leaves the game unmodified.

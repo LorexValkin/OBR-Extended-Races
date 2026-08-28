@@ -1,0 +1,10 @@
+# Only what ships, and the source behind it, is tracked:
+#   mod/esp, mod/pak, mod/ue4ss (Lua mods, the DLL and its src/), docs/release.
+# Build tooling, extraction work and the investigation write-ups stay local.
+.work/
+dist/
+__pycache__/
+*.pyc
+tools/
+docs/design/
+docs/findings/
