@@ -33,11 +33,14 @@ than sounding like someone else.
 
 ## Install
 
-Drop the three folders onto `OblivionRemastered\`, keeping the structure:
+**Vortex:** install the archive as it is; the Oblivion Remastered extension detects
+it as a root mod and deploys everything. **Manual:** extract the archive into the
+game's install folder — the one that contains `OblivionRemastered\` and `Engine\` —
+so you end up with:
 
 ```
 OblivionRemastered\
-  ObvData\Data\ExtendedRaces.esp
+  Content\Dev\ObvData\Data\ExtendedRaces.esp
   Content\Paks\~mods\zz_ExtendedRaces_P.pak   (+ .ucas, .utoc)
   Binaries\Win64\ue4ss\Mods\OBRPlayableRaces\
   Binaries\Win64\ue4ss\Mods\OBRDremoraHorns\
