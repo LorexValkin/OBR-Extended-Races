@@ -194,10 +194,6 @@ entirely. Change race before uninstalling, or keep a save from before.
   recording of him exists anywhere in the game, so his race is pointed at
   Imperial's, the way the shipped Dark Elves are pointed at High Elf's.
   Dark Seducer, Golden Saint and Dremora use their own recordings.
-- **Stagger grunts are silent for all four.** The Wwise bank declares the switch
-  value for each of them and then leaves the branch empty, which is a decision
-  in the shipped audio rather than a missing key. Breathing, fatigue and
-  footsteps are unaffected and work normally.
 - **Another mod that makes further races playable will break the numbering.**
   `RaceId` counts positions in the alphabetical playable list, so anything that
   inserts more races shifts everything after them. That shows up as the wrong
