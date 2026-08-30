@@ -1,5 +1,5 @@
 [size=5][b]Extended Races[/b][/size]
-[size=3]Dark Seducer, Golden Saint, Dremora and Sheogorath — playable, with their own voices, horns and a first-person pass[/size]
+[size=3]Dark Seducer, Golden Saint, Dremora and Sheogorath: playable, with their own voices, horns and a first-person pass[/size]
 
 Four races the game already models but never lets you pick, added to character creation. Not copies: these are the real race records, so you are the same Dremora the game's Dremora are, with their stats, bodies, faces and recordings.
 
@@ -8,15 +8,15 @@ Built against [b]Oblivion Remastered 1.512.105[/b].
 [size=4][b]What you get[/b][/size]
 
 [list]
-[*][b]Dark Seducer[/b] — male and female, full face sliders
-[*][b]Golden Saint[/b] — male and female, full face sliders
-[*][b]Dremora[/b] — male and female (male has face sliders; the female head ships without morph data, so her face is fixed)
-[*][b]Sheogorath[/b] — male only, fixed face
+[*][b]Dark Seducer[/b]: male and female, full face sliders
+[*][b]Golden Saint[/b]: male and female, full face sliders
+[*][b]Dremora[/b]: male and female (male has face sliders; the female head ships without morph data, so her face is fixed)
+[*][b]Sheogorath[/b]: male only, fixed face
 [/list]
 
 [b]Horns.[/b] Dremora get a [b]Horns[/b] row in the character creator, above Hair Style, with four horn sets and "None". Horns sit in a head slot of their own, so you keep your hairstyle, beard and moustache.
 
-[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear — the Isles races because theirs are locked behind a faction no player can join, female Dremora because hers are filed under a voice folder the player never gets. This mod points each race at its own recordings. Sheogorath has no combat recordings at all, so he borrows Imperial's the same way the shipped Dark Elves borrow High Elf's.
+[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear. The Isles races' lines are locked behind a faction no player can join, and female Dremora's are filed under a voice folder the player never gets. This mod points each race at its own recordings. Sheogorath has no combat recordings at all, so he borrows Imperial's the same way the shipped Dark Elves borrow High Elf's.
 
 [b]First person works.[/b] These races were never meant to be seen from the inside. Their skin materials were missing the game's first-person clipping fix and two of the bodies cull at the camera, so near a wall your gauntlets would drift off your hands and the hands would vanish into the wall. Both are handled at runtime; the arms keep the race's own skin.
 
@@ -24,19 +24,19 @@ Built against [b]Oblivion Remastered 1.512.105[/b].
 
 [size=4][b]Requirements[/b][/size]
 
-[b]UE4SS — required, and not only for cosmetics.[/b] The plugin and pak make the races selectable, but the shipping executable cannot carry a character of any of them into the world: the character-creation Confirm handler looks the race name up in a ten-entry table compiled into the binary and dereferences the miss. Confirming a Dark Seducer, Golden Saint, Dremora or Sheogorath [b]crashes the game[/b] without the bundled [b]OBRPlayableRaces[/b] mod, which rebuilds that table at startup. No pak or plugin can do that.
+[b]UNBSE 0.11.0-rc.1. That is the one requirement.[/b] Get it from [url=https://github.com/LorexValkin/UNBSE]github.com/LorexValkin/UNBSE[/url] and install it first, exactly as its README says: remove any legacy obse64_loader.exe / obse64_*.dll, keep OBSE\Plugins if you have one, extract the UNBSE archive into OblivionRemastered\Binaries\Win64. Then this archive on top.
 
-[b]UNBSE 0.11.0-rc.1 — required.[/b] OBRPlayableRaces is a [url=https://github.com/LorexValkin/UNBSE]UNBSE[/url] (Unblivion Script Extender) add-on, and UNBSE is where the UE4SS runtime these mods are built against comes from: RE-UE4SS main at 68dd45cb (July 2026, [i]UE4SS - v3.0.1 Beta #0 - Git SHA #68dd45cb[/i]), pinned, patched and packaged by UNBSE together with its settings file. Install UNBSE first, as its README says (remove any legacy obse64_loader.exe / obse64_*.dll, keep OBSE\Plugins if you have one, extract the UNBSE archive into OblivionRemastered\Binaries\Win64), then this archive on top. No OBSE64 is needed.
+You do not install UE4SS separately. UNBSE ships its own UE4SS inside the package (RE-UE4SS main at 68dd45cb, July 2026, patched and pinned by UNBSE, with the settings file already set), and that is the build these mods are compiled against. No OBSE64 is needed either.
 
-With UNBSE, OBRPlayableRaces registers as add-on [i]obr.playable-races[/i], declaring that it reads and writes the running executable; checks the executable's identity through UNBSE's runtime-info service and does nothing at all on any build other than 1.512.105; resolves every address it touches through UNBSE's bounded relocation service; and publishes a read-only status line to UE4SS Lua as [i]UNBSE.Invoke("obr_playable_races", "status")[/i].
+[b]Why a script extender at all.[/b] The plugin and pak make the races selectable, but the shipping executable cannot carry a character of any of them into the world: the character-creation Confirm handler looks the race name up in a ten-entry table compiled into the binary and dereferences the miss. Confirming a Dark Seducer, Golden Saint, Dremora or Sheogorath [b]crashes the game[/b] without the bundled [b]OBRPlayableRaces[/b] mod, which rebuilds that table at startup. No pak or plugin can do that. OBRPlayableRaces is a UNBSE add-on: it registers with UNBSE as [i]obr.playable-races[/i], declaring that it reads and writes the running executable; checks the executable's identity through UNBSE's runtime-info service and does nothing at all on any build other than 1.512.105; resolves every address it touches through UNBSE's bounded relocation service; and publishes a read-only status line to UE4SS Lua as [i]UNBSE.Invoke("obr_playable_races", "status")[/i].
 
 [size=4][b]Install[/b][/size]
 
-[b]Vortex:[/b] install the archive as it is; the Oblivion Remastered extension detects it as a root mod and deploys everything. [b]Manual:[/b] extract the archive into the game's install folder — the one that contains [b]OblivionRemastered\[/b] and [b]Engine\[/b] — so you end up with:
+[b]Vortex:[/b] install the archive as it is; the Oblivion Remastered extension detects it as a root mod and deploys everything. [b]Manual:[/b] extract the archive into the game's install folder, the one that contains [b]OblivionRemastered\[/b] and [b]Engine\[/b], so you end up with:
 
 [code]OblivionRemastered\
   Content\Dev\ObvData\Data\ExtendedRaces.esp
-  Content\Paks\~mods\zz_ExtendedRaces_P.pak   (+ .ucas, .utoc — all three are required)
+  Content\Paks\~mods\zz_ExtendedRaces_P.pak   (+ .ucas, .utoc; all three are required)
   Binaries\Win64\ue4ss\Mods\OBRPlayableRaces\
   Binaries\Win64\ue4ss\Mods\OBRDremoraHorns\
   Binaries\Win64\ue4ss\Mods\OBRFirstPersonSkin\[/code]
@@ -47,11 +47,11 @@ Then add the plugin to your load order. In [b]OblivionRemastered\Content\Dev\Obv
 
 [b]after AltarESPMain.esp[/b] (and any other Altar*.esp). That is not optional: AltarESPMain.esp overrides 14 of the 15 race records itself, so a plugin loading before it silently loses.
 
-UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-settings.ini, ue4ss\Mods\UNBSE\, ue4ss\Mods\UNBSEOBSE64Interop\). The three UE4SS mods here ship an [b]enabled.txt[/b], so they start automatically — you do not need to edit mods.txt. UNBSE's UE4SS-settings.ini has every key these mods need; if you keep your own, these must stay on under [Hooks]: HookEngineTick (OBRPlayableRaces runs entirely off the engine tick), HookLoadMap, HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
+UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-settings.ini, ue4ss\Mods\UNBSE\, ue4ss\Mods\UNBSEOBSE64Interop\). The three mods here ship an [b]enabled.txt[/b], so they start automatically; you do not need to edit mods.txt. UNBSE's UE4SS-settings.ini has every key these mods need. If you keep your own, these must stay on under [Hooks]: HookEngineTick (OBRPlayableRaces runs entirely off the engine tick), HookLoadMap, HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
 
-[b]Do not swap in another UE4SS[/b] — not the Nexus "UE4SS for OblivionRemastered" package (v3.0.1-394-g437a8ff) and not the GitHub "v3.0.1" zip. A C++ mod is tied to the UE4SS build it was compiled against: on either of those the Lua mods start, but UE4SS refuses OBRPlayableRaces with [i]Failed to load dll ... error code: 0x7f[/i], after which confirming a character crashes. If you already have the Nexus UE4SS installed for other mods, UNBSE's UE4SS.dll replaces it (in Vortex, let UNBSE win the conflict); Lua mods written for the Nexus build generally keep working under it, C++ mods compiled for it will not load — the mirror image of the same rule.
+[b]Do not swap in another UE4SS.[/b] Not the Nexus "UE4SS for OblivionRemastered" package (v3.0.1-394-g437a8ff) and not the GitHub "v3.0.1" zip. A C++ mod is tied to the UE4SS build it was compiled against: on either of those the Lua mods start, but UE4SS refuses OBRPlayableRaces with [i]Failed to load dll ... error code: 0x7f[/i], after which confirming a character crashes. If you already have the Nexus UE4SS installed for other mods, UNBSE's UE4SS.dll replaces it (in Vortex, let UNBSE win the conflict). Lua mods written for the Nexus build generally keep working under it; C++ mods compiled for it will not load, which is the same rule seen from the other side.
 
-[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.0 (... verified ...)[/i], then [i]executable identity ... - OblivionRemastered-Win64-Shipping 1.512.105[/i], then [i]rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If the last line is missing, the mod did not do its work — do not create a character, it will crash. If the identity line says [i]NOT the build this mod was measured against; doing nothing[/i], your executable is not 1.512.105 and the mod has deliberately stood down.
+[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.0 (... verified ...)[/i], then [i]executable identity ... - OblivionRemastered-Win64-Shipping 1.512.105[/i], then [i]rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If the last line is missing, the mod did not do its work. Do not create a character, it will crash. If the identity line says [i]NOT the build this mod was measured against; doing nothing[/i], your executable is not 1.512.105 and the mod has deliberately stood down.
 
 [size=4][b]Saves[/b][/size]
 
@@ -60,7 +60,7 @@ UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-set
 [size=4][b]Known errors[/b][/size]
 
 [list]
-[*][b]If the mod loads incorrectly for any reason, a character of the four races comes back as an Imperial[/b] — Imperial race values and body, with the Dremora (or Seducer/Saint/Sheogorath) head, face and skin colour left as they were. Race is stored as a position in the alphabetical playable-race list: with the mod active that list is 14 long and Dremora is #4; in the vanilla list #4 is Imperial. So whenever the game resolves that list without the mod's race records — ExtendedRaces.esp missing from Plugins.txt, disabled, or loading before AltarESPMain.esp / AltarDeluxe.esp, or the mod not installed — the saved race number lands on the wrong race while the saved head data does not change. It is not a save corruption: get the plugin active and in the right place and the same save loads as the right race again. Vortex users: check the plugin is [b]enabled[/b] in Vortex's Plugins tab and sorted after the Altar plugins — Vortex regenerates Plugins.txt itself.
+[*][b]If the mod loads incorrectly for any reason, a character of the four races comes back as an Imperial:[/b] Imperial race values and body, with the Dremora (or Seducer/Saint/Sheogorath) head, face and skin colour left as they were. Race is stored as a position in the alphabetical playable-race list: with the mod active that list is 14 long and Dremora is #4; in the vanilla list #4 is Imperial. So whenever the game resolves that list without the mod's race records (ExtendedRaces.esp missing from Plugins.txt, disabled, or loading before AltarESPMain.esp / AltarDeluxe.esp, or the mod not installed), the saved race number lands on the wrong race while the saved head data does not change. It is not a save corruption: get the plugin active and in the right place and the same save loads as the right race again. Vortex users: check the plugin is [b]enabled[/b] in Vortex's Plugins tab and sorted after the Altar plugins, since Vortex regenerates Plugins.txt itself.
 [/list]
 
 [size=4][b]Known limitations[/b][/size]
@@ -70,7 +70,7 @@ UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-set
 [*][b]Dremora female gets one horn set.[/b] Only one of the shipped horn meshes is skinned to the female head; the other three are male-only.
 [*][b]Nobody reacts to you as a Dremora.[/b] Race-specific lines for these races don't exist; you get Imperial's. Your own race's lines still play wherever any exist.
 [*][b]Sheogorath fights with Imperial's voice.[/b] No hit or power-attack recording of him exists in the game, so his race is pointed at Imperial's.
-[*][b]Another mod that makes further races playable will break the numbering[/b] — race ids are positions in the alphabetical playable list. That shows up as the wrong race being applied, not a crash.
+[*][b]Another mod that makes further races playable will break the numbering.[/b] Race ids are positions in the alphabetical playable list. That shows up as the wrong race being applied, not a crash.
 [*][b]Horn menu tiles borrow Argonian icons.[/b] The shipped horn art has no menu portraits.
 [/list]
 
@@ -80,8 +80,8 @@ The plugin overrides the four RACE records, three Dremora HAIR records, three EY
 
 [size=4][b]Credits[/b][/size]
 
-[b]SirNwah[/b] — testing. Thanks for running the builds on a second machine and reporting what actually happened, logs and pictures included; the "loads as an Imperial" entry above exists because of that.
+[b]SirNwah[/b]: testing. Thanks for running the builds on a second machine and reporting what actually happened, logs and pictures included; the "loads as an Imperial" entry above exists because of that.
 
 [size=4][b]How it was built[/b][/size]
 
-Everything in the archive is generated from the game's own data; nothing is hand-edited binary. Every fix here was measured against the shipping executable and packages rather than assumed — the crash, the race numbering, the dialogue gating, the combat-voice selection and the first-person clipping fix were each traced to a specific mechanism before being fixed. The OBRPlayableRaces DLL checks the executable's identity through UNBSE before it does anything, verifies each engine structure before writing to it and, on a build it does not recognise, logs and leaves the game unmodified. It is compiled against UNBSE's pinned UE4SS source, through the same build hook UNBSE uses for its own module.
+Everything in the archive is generated from the game's own data; nothing is hand-edited binary. Every fix here was measured against the shipping executable and packages rather than assumed: the crash, the race numbering, the dialogue gating, the combat-voice selection and the first-person clipping fix were each traced to a specific mechanism before being fixed. The OBRPlayableRaces DLL checks the executable's identity through UNBSE before it does anything, verifies each engine structure before writing to it and, on a build it does not recognise, logs and leaves the game unmodified. It is compiled against UNBSE's pinned UE4SS source, through the same build hook UNBSE uses for its own module.
