@@ -26,7 +26,9 @@ Built against [b]Oblivion Remastered 1.512.105[/b].
 
 [b]UE4SS — required, and not only for cosmetics.[/b] The plugin and pak make the races selectable, but the shipping executable cannot carry a character of any of them into the world: the character-creation Confirm handler looks the race name up in a ten-entry table compiled into the binary and dereferences the miss. Confirming a Dark Seducer, Golden Saint, Dremora or Sheogorath [b]crashes the game[/b] without the bundled [b]OBRPlayableRaces[/b] mod, which rebuilds that table at startup. No pak or plugin can do that.
 
-Get UE4SS from [url=https://github.com/UE4SS-RE/RE-UE4SS/releases]RE-UE4SS releases[/url]. Tested against [b]v3.0.1[/b]. Nothing else is needed — no script extender, no OBSE.
+[b]UNBSE 0.11.0-rc.1 — required.[/b] OBRPlayableRaces is a [url=https://github.com/LorexValkin/UNBSE]UNBSE[/url] (Unblivion Script Extender) add-on, and UNBSE is where the UE4SS runtime these mods are built against comes from: RE-UE4SS main at 68dd45cb (July 2026, [i]UE4SS - v3.0.1 Beta #0 - Git SHA #68dd45cb[/i]), pinned, patched and packaged by UNBSE together with its settings file. Install UNBSE first, as its README says (remove any legacy obse64_loader.exe / obse64_*.dll, keep OBSE\Plugins if you have one, extract the UNBSE archive into OblivionRemastered\Binaries\Win64), then this archive on top. No OBSE64 is needed.
+
+With UNBSE, OBRPlayableRaces registers as add-on [i]obr.playable-races[/i], declaring that it reads and writes the running executable; checks the executable's identity through UNBSE's runtime-info service and does nothing at all on any build other than 1.512.105; resolves every address it touches through UNBSE's bounded relocation service; and publishes a read-only status line to UE4SS Lua as [i]UNBSE.Invoke("obr_playable_races", "status")[/i].
 
 [size=4][b]Install[/b][/size]
 
@@ -45,13 +47,21 @@ Then add the plugin to your load order. In [b]OblivionRemastered\Content\Dev\Obv
 
 [b]after AltarESPMain.esp[/b] (and any other Altar*.esp). That is not optional: AltarESPMain.esp overrides 14 of the 15 race records itself, so a plugin loading before it silently loses.
 
-The three UE4SS mods ship an [b]enabled.txt[/b], so they start automatically — you do not need to edit mods.txt. If you have edited UE4SS-settings.ini, these must stay on under [Hooks]: HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
+UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-settings.ini, ue4ss\Mods\UNBSE\, ue4ss\Mods\UNBSEOBSE64Interop\). The three UE4SS mods here ship an [b]enabled.txt[/b], so they start automatically — you do not need to edit mods.txt. UNBSE's UE4SS-settings.ini has every key these mods need; if you keep your own, these must stay on under [Hooks]: HookEngineTick (OBRPlayableRaces runs entirely off the engine tick), HookLoadMap, HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
 
-[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If that line is missing, UE4SS is not loading the mod — do not create a character, it will crash.
+[b]Do not swap in another UE4SS[/b] — not the Nexus "UE4SS for OblivionRemastered" package (v3.0.1-394-g437a8ff) and not the GitHub "v3.0.1" zip. A C++ mod is tied to the UE4SS build it was compiled against: on either of those the Lua mods start, but UE4SS refuses OBRPlayableRaces with [i]Failed to load dll ... error code: 0x7f[/i], after which confirming a character crashes. If you already have the Nexus UE4SS installed for other mods, UNBSE's UE4SS.dll replaces it (in Vortex, let UNBSE win the conflict); Lua mods written for the Nexus build generally keep working under it, C++ mods compiled for it will not load — the mirror image of the same rule.
+
+[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.0 (... verified ...)[/i], then [i]executable identity ... - OblivionRemastered-Win64-Shipping 1.512.105[/i], then [i]rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If the last line is missing, the mod did not do its work — do not create a character, it will crash. If the identity line says [i]NOT the build this mod was measured against; doing nothing[/i], your executable is not 1.512.105 and the mod has deliberately stood down.
 
 [size=4][b]Saves[/b][/size]
 
 [b]Safe to add to an existing save. Not safe to remove from one if your character is one of the four races.[/b] The plugin only overrides records that already exist and creates no new forms, so adding it is safe, and so is removing it from a character of a vanilla race. But the engine identifies races by their position in the playable list, so a save made as one of the four resolves correctly only while the mod is installed. Change race before uninstalling, or keep a save from before.
+
+[size=4][b]Known errors[/b][/size]
+
+[list]
+[*][b]If the mod loads incorrectly for any reason, a character of the four races comes back as an Imperial[/b] — Imperial race values and body, with the Dremora (or Seducer/Saint/Sheogorath) head, face and skin colour left as they were. Race is stored as a position in the alphabetical playable-race list: with the mod active that list is 14 long and Dremora is #4; in the vanilla list #4 is Imperial. So whenever the game resolves that list without the mod's race records — ExtendedRaces.esp missing from Plugins.txt, disabled, or loading before AltarESPMain.esp / AltarDeluxe.esp, or the mod not installed — the saved race number lands on the wrong race while the saved head data does not change. It is not a save corruption: get the plugin active and in the right place and the same save loads as the right race again. Vortex users: check the plugin is [b]enabled[/b] in Vortex's Plugins tab and sorted after the Altar plugins — Vortex regenerates Plugins.txt itself.
+[/list]
 
 [size=4][b]Known limitations[/b][/size]
 
@@ -68,6 +78,10 @@ The three UE4SS mods ship an [b]enabled.txt[/b], so they start automatically —
 
 The plugin overrides the four RACE records, three Dremora HAIR records, three EYES records, and the combat-dialogue quests Generic, GenericFodderCombat, GenericDremora and SENQDGeneric plus 15 of SENQDGeneric's combat INFOs. Anything else that edits those records will conflict in the usual load-order way. The pak adds rows and new assets only; it overrides no shipped package. The UE4SS mods touch the player only.
 
+[size=4][b]Credits[/b][/size]
+
+[b]SirNwah[/b] — testing. Thanks for running the builds on a second machine and reporting what actually happened, logs and pictures included; the "loads as an Imperial" entry above exists because of that.
+
 [size=4][b]How it was built[/b][/size]
 
-Everything in the archive is generated from the game's own data; nothing is hand-edited binary. Every fix here was measured against the shipping executable and packages rather than assumed — the crash, the race numbering, the dialogue gating, the combat-voice selection and the first-person clipping fix were each traced to a specific mechanism before being fixed. The OBRPlayableRaces DLL verifies each engine structure before writing to it and, on a build it does not recognise, logs and leaves the game unmodified.
+Everything in the archive is generated from the game's own data; nothing is hand-edited binary. Every fix here was measured against the shipping executable and packages rather than assumed — the crash, the race numbering, the dialogue gating, the combat-voice selection and the first-person clipping fix were each traced to a specific mechanism before being fixed. The OBRPlayableRaces DLL checks the executable's identity through UNBSE before it does anything, verifies each engine structure before writing to it and, on a build it does not recognise, logs and leaves the game unmodified. It is compiled against UNBSE's pinned UE4SS source, through the same build hook UNBSE uses for its own module.
