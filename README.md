@@ -310,6 +310,15 @@ override them if yours differ from the defaults.
 **The usmap must match the game build.** Reflected property layouts move between
 patches, and a stale usmap decodes silently wrong rather than failing.
 
+## Companion mod: Horns for All
+
+`mod-horns\` is a second, standalone mod in this repo: the Horns row for
+**every** playable race — the four Dremora sets plus the four true-horn
+Argonian styles, male and female — including Dark Seducer, Golden Saint,
+Dremora and Sheogorath. It works with or without Extended Races; installed
+together, its `zzz_` pak mounts later and extends the Dremora Horns row with
+the Argonian styles. See `mod-horns\README.md`.
+
 ## Credits
 
 - **SirNwah** — testing. Thanks for running the builds on a second machine and
