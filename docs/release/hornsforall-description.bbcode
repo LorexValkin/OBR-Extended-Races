@@ -1,0 +1,54 @@
+[size=5][b]Horns for All[/b][/size]
+[size=3]The Dremora and Argonian horn sets on every playable race, Extended Races included[/size]
+
+A [b]Horns[/b] row in the character creator, above Hair Style, for every race: the four Dremora horn sets and the four Argonian horn styles, plus "None". Horns sit in a head slot of their own, so you keep your hairstyle, beard and moustache. These are the game's own horn meshes; nothing here is new art.
+
+Built against [b]Oblivion Remastered 1.512.105[/b].
+
+[size=4][b]What you get[/b][/size]
+
+[list]
+[*][b]Horns, Horns Curved, Horns of the Kyn[/b]: the Dremora sets, male only (each mesh is skinned to the body it was authored for)
+[*][b]Horns Swept[/b]: the female Dremora set, female only
+[*][b]Straight Horns, Curved Horns, Forehead Spikes, Forehead Spikes Jeweled[/b]: the Argonian styles, male and female (the game ships a separate mesh for each)
+[/list]
+
+Every playable race gets the row: the ten vanilla races and, if you run Extended Races, Dark Seducer, Golden Saint, Dremora and Sheogorath as well. Dremora's own Horns row gains the Argonian styles on top of its four sets, and a saved Dremora's horn selection keeps meaning the same horns.
+
+[size=4][b]Requirements[/b][/size]
+
+[b]UE4SS. That is the one requirement.[/b] This mod is a content pak and a small Lua mod; there is no plugin and no C++. Any UE4SS that runs Lua mods works, including the build UNBSE bundles for Extended Races, so if you run Extended Races you already have everything and install nothing new. Extended Races itself is not required.
+
+[b]Why a script extender at all.[/b] The pak alone draws the row, and clicking it does nothing: the row uses the EyebrowsStyle toggle type, the one head slot no shipped content fills, and the shipping menu implements no handler for that type. The row draws and dispatches, then the dispatcher drops it. The bundled [b]OBRHornsForAll[/b] Lua mod rewrites the type to BeardStyle for the length of the dispatch call, which runs the native path exactly as it does for a beard; the pieces themselves are eyebrows-class, so they land in the eyebrows slot and hair, beard and moustache are untouched. About ten lines of Lua. It coexists with Extended Races' OBRDremoraHorns: whichever hooks first does the work, the other stands down.
+
+[size=4][b]Install[/b][/size]
+
+[b]Vortex:[/b] install the archive as it is; the Oblivion Remastered extension detects it as a root mod and deploys everything. [b]Manual:[/b] extract the archive into the game's install folder, the one that contains [b]OblivionRemastered\[/b] and [b]Engine\[/b], so you end up with:
+
+[code]OblivionRemastered\
+  Content\Paks\~mods\zzz_HornsForAll_P.pak   (+ .ucas, .utoc; all three are required)
+  Binaries\Win64\ue4ss\Mods\OBRHornsForAll\[/code]
+
+No .esp and no Plugins.txt entry. The pak is named [b]zzz_[/b] so it mounts after zz_ExtendedRaces_P and its Dremora table wins; keep the file names as they are. The Lua mod ships an [b]enabled.txt[/b], so it starts automatically.
+
+[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][HornsForAll] loaded - Horns row enabled for all races[/i] at startup, then [i][HornsForAll] Horns row live: toggle type 7 -> 5[/i] the first time you click a horn tile.
+
+[size=4][b]Saves[/b][/size]
+
+[b]Safe to add to an existing save, and safe to remove.[/b] A horn selection is an option index into a row this mod provides; remove the mod and the index points at nothing, so the character comes back hornless and everything else is untouched. With Extended Races installed, the Dremora row keeps its original first five options in their original order, so a Dremora's saved selection means the same horns with or without this mod.
+
+[size=4][b]Known limitations[/b][/size]
+
+[list]
+[*][b]The Dremora sets are male-only, except Horns Swept.[/b] Only one of the shipped horn meshes is skinned to the female head; the other three are male-only. Same limitation as in Extended Races.
+[*][b]Fit varies by head.[/b] The horn meshes bind to the shared humanoid head rig, and they were authored for Dremora and Argonian heads. On faces far from those, Khajiit especially, seating can drift; nothing here re-fits geometry per race.
+[*][b]The Dremora menu tiles borrow Argonian icons.[/b] The shipped horn art has no menu portraits. The Argonian styles use their own shipped icons.
+[/list]
+
+[size=4][b]Compatibility[/b][/size]
+
+The pak overrides the ten vanilla DT_RaceSex customisation tables, with the Horns row spliced in and every shipped row carried through byte-for-byte, plus Extended Races' DT_RaceSex_Dremora. Any other mod that edits those tables conflicts in the usual pak mount-order way. No plugin records are touched, so nothing here conflicts with .esp mods. The Lua mod touches the character-creation menu dispatch only.
+
+[size=4][b]How it was built[/b][/size]
+
+Everything in the archive is generated from the game's own data; nothing is hand-edited binary. The mechanism is the one measured for Extended Races' Dremora horns: the eyebrows head slot every head instantiates and no shipped content fills, the menu toggle type the dispatcher ignores, and the material rename that blanks the fused hairstyles baked into the Dremora horn meshes. The Argonian horn meshes needed none of that: inspected, each carries a single horn material and the shared head rig, so the pak references them exactly where they ship and adds nothing.
