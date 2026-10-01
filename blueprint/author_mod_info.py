@@ -71,7 +71,8 @@ def main():
     factory = unreal.DataAssetFactory()
     factory.set_editor_property("data_asset_class", loader_class)
     tools = unreal.AssetToolsHelpers.get_asset_tools()
-    asset = unreal.EditorAssetLibrary.load_asset(PACKAGE)
+    asset = (unreal.EditorAssetLibrary.load_asset(PACKAGE)
+             if unreal.EditorAssetLibrary.does_asset_exist(PACKAGE) else None)
     if not asset:
         asset = tools.create_asset(
             "DA_ExtendedRacesModInfo",
