@@ -1,6 +1,6 @@
 # Extended Races first-person skin candidate
 
-## October 1 source correction (not cooked yet)
+## October 1 corrected Blueprint and cooked candidate
 
 The authoring source now creates an unattached dynamic material through
 `KismetMaterialLibrary`, copies the original component material's parameters,
@@ -22,13 +22,21 @@ UE4SS nor the loader. It rejected the historical September 24 candidate's
 nonzero cook result before creating output. This packager does not turn the
 skin-only Blueprint into a complete runtime replacement.
 
-No new Blueprint asset or release archive has been generated from these
-changes. Another active session holds `PerfEditor.lock` as
-`FinalCallerVerification 55388`; no process or lock was removed. A fresh
-author/compile/cook remains required. Body Guard, female Dremora voice state,
-Sheogorath player-only combat voice and full retail acceptance remain open as
-described in the migration document. The existing native race-map/Horns bridge
-is separate from UML discovery; this work adds no UNBSE loading dependency.
+The corrected source compiled and linked in isolation. A fresh authoring run
+saved three functions and two events with zero Blueprint errors and warnings.
+Metadata binding persisted the logic actor and the ESP's twelve masters. The
+isolated v3 cook exited 0 with zero errors and thirteen startup/configuration
+warnings (online subsystems, device CVars, collision channels and a Python enum
+name collision). Only the two owned packages were cooked. The previous failed
+cook and packaging runs remain retained under their original candidate paths.
+
+Current source assets in `blueprint/assets/` match the generated October 1
+assets. The race-only content pack excludes the Horns side mod. The combined
+candidate and retail voice-overlays are documented in
+`docs/2026-10-01-uml-retail-overlays.md`. Retail acceptance and the separate
+Body Guard compatibility port remain unfinished. Native Confirm still needs
+the existing first-party fourteen-race registration; UML remains the mod
+loader and this candidate includes no UE4SS or UNBSE.
 
 The source in `native_authoring/ExtendedRacesSkinCommandlet.{h,cpp}` authors
 `/Game/Mods/ExtendedRaces/BP_ExtendedRacesFirstPersonSkin` in the mapped

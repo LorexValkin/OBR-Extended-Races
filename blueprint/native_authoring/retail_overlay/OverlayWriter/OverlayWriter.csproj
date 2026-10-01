@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="UAssetAPI">
+            <HintPath>D:/Dump Experiment/FullDump/dependencies/UAssetAPI.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>D:/Dump Experiment/FullDump/dependencies/Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="ZstdSharp">
+            <HintPath>D:/Dump Experiment/FullDump/dependencies/ZstdSharp.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>
