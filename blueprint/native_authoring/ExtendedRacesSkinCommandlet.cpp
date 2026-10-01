@@ -363,8 +363,11 @@ UExtendedRacesSkinCommandlet::UExtendedRacesSkinCommandlet()
     LogToConsole = true;
 }
 
+#include "SkeletonPreview.inl"
+
 int32 UExtendedRacesSkinCommandlet::Main(const FString& Params)
 {
+    if (FParse::Param(*Params,TEXT("SkeletonPrototype"))) return AuthorSkeletonPreview();
     using namespace ExtendedRacesSkin;
     const FString Asset(AssetPath);
     const FString Name = FPackageName::GetLongPackageAssetName(Asset);

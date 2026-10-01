@@ -1,5 +1,9 @@
 # Extended Races UML retail-overlay candidate, October 1
 
+Historical build record. This candidate was subsequently installed, then
+superseded by the required-Dremora-horns correction and Skeleton test preview.
+See [the current installed status](2026-10-01-skeleton-prototype-and-required-horns.md).
+
 The owner permits child assets and mod-pack overrides of retail behavior. The
 Horns side mod is out of scope. The UML loader is unchanged. All builds and
 packaging outputs below are isolated; nothing from this candidate was installed
