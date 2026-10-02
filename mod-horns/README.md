@@ -67,6 +67,50 @@ coexist: whichever hooks first does the work, the other stands down.
 
 - The horn meshes bind to the shared humanoid head rig. On heads far from the
   ones they were authored for (Khajiit and Argonian especially, for the
-  Dremora sets) seating can drift; nothing here re-fits geometry per race.
+  Dremora sets) seating can drift. The experimental offset controls below can
+  adjust placement; they do not reshape or re-skin the meshes.
 - Removing the mod mid-save leaves the eyebrows-slot index pointing at a row
   that no longer exists; the game falls back to no horns.
+
+## Experimental horn positioning
+
+This build adds adjustable player horn placement. It has passed Lua fixture
+tests; visual fit in the shipping game is **not yet verified**. It does not
+include guessed offsets or change which horn styles each sex can select.
+
+Select a horn style and hold **Ctrl+Alt** with one of these keys:
+
+| Key | Action |
+| --- | --- |
+| Up / Down | Increase / decrease Z (height on the usual upright attachment) |
+| Right / Left | Increase / decrease X |
+| Page Up / Page Down | Increase / decrease Y |
+| Backspace | Reset the current race/sex/style to its original placement |
+| S | Save all current corrections |
+
+Each press moves by **0.25 Unreal units**, with each axis limited to +/-10.
+X/Y/Z are relative to the horn component's parent; check their visible direction
+on your character. Start with **Ctrl+Alt+Down** for floating horns. Corrections
+are separate for each race, sex, and horn style and apply only to the player's
+Eyebrows slot and its associated shadow proxy. Hair and beard slots are untouched.
+
+Adjustments are previews until you press **Ctrl+Alt+S**. A reset must also be
+saved if you want it to persist. Saved corrections live next to `main.lua` in
+`Scripts/horn-offsets.ini`, outside the game save, and are loaded at startup.
+The previous settings file is retained as `.bak` after a successful replacement.
+Preserve this file when updating the mod. Malformed or unreadable settings disable
+saving for that session and report the problem in `UE4SS.log`.
+
+The system reapplies saved corrections after appearance changes, with a 250 ms
+fallback check. It remembers the unadjusted component position to avoid adding
+the offset repeatedly. A brief unadjusted frame during rebuilding is still
+possible. This is a translation adjustment, not a geometry or skinning repair;
+animation, extreme head shapes, and certain horn combinations may still need
+fitted meshes. Profiles are shared by characters with the same race/sex/style.
+
+Before treating a correction as verified, inspect it from the front and side
+in the creator and gameplay, turn/look up and down, change hairstyle and horn
+style, then save the correction and reload the game. Check that hair, beard,
+NPCs, and the horn shadow remain correct. `[HornsForAll] offset preview` and
+`offsets saved` in `UE4SS.log` identify the selected profile and saved values;
+startup alone does not prove visible placement.

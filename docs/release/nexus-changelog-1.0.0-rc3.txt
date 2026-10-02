@@ -1,0 +1,6 @@
+Nexus changelog entry for 1.0.0-rc3 (plain text, paste into the Changelogs tab)
+--------------------------------------------------------------------------------
+
+Fixed a crash when quitting the game. OBRPlayableRaces (now 0.5.1) rebuilds the executable's race-name table at startup; 0.5.0 built the replacement from the mod DLL's own memory, which the game's allocator then tried to free during shutdown and crashed on, every time. The table is now built from the game's own allocator and the buffers it replaces are returned to it, so shutdown walks memory it actually owns. Verified with UNBSE Sentinel: the exit access violation reproduced on every quit before the fix and has not appeared since.
+
+Nothing else changed. In-game behaviour is identical; the UE4SS.log registration line now reads 0.5.1.

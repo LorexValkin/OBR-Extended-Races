@@ -3,7 +3,7 @@
 `dlls/main.dll` is a build artifact, vendored here so a release can be cut from
 this repository alone. It is not written here.
 
-`src\dllmain.cpp`, `src\CMakeLists.txt` and the UNBSE SDK headers under
+`src\dllmain.cpp`, `src\PlayerVoiceRace.hpp`, `src\CMakeLists.txt` and the UNBSE SDK headers under
 `src\unbse-sdk\` are the source. The headers are the five files every UNBSE
 package ships under `ue4ss\Mods\UNBSE\sdk\`, copied byte-for-byte from
 `UNBSE-0.11.0-rc.1.zip`; their SHA-256s are the ones UNBSE's own
@@ -67,9 +67,17 @@ way into the world: the Confirm handler looks the race name up in a ten-entry
 table compiled into the executable and dereferences the miss. See
 `docs/findings/2026-08-27-race-unlocking-engine-defects.md`.
 
-## What it does (0.5.0)
+## What it does (0.5.2)
 
-1. Rebuilds the race-name map (the crash fix).
+1. Rebuilds the race-name map (the crash fix). Since 0.5.1 the replacement
+   element array, key strings and hash buckets are allocated from the game's
+   own allocator (`GMalloc`), and the buffers being replaced are returned to
+   it. 0.5.0 used the DLL's CRT heap and pointed the keys at string literals
+   in the DLL image; the map is a static in the executable whose destructor
+   frees everything through `FMallocBinned2` from the atexit table, so every
+   quit died with an access violation on the game thread (confirmed twice in
+   UNBSESentinel crash reports: `ucrtbase` onexit → static destructors →
+   `EXCEPTION_ACCESS_VIOLATION` reading a foreign heap pointer).
 2. Aliases the four races' `GetIsRace` conditions to Imperial, player only.
 3. Keeps a female Dremora player in `AltVoiceFaction`, and out of it
    otherwise, and keeps her alt-voice flag set, so the engine files her combat
@@ -83,6 +91,14 @@ table compiled into the executable and dereferences the miss. See
    only then plus once a minute. Those functions are called natively, never
    through `ProcessEvent`, so the hooks never fired and the voice state lagged
    Confirm by up to a minute. The poll replaces them.)
+
+4. Supplies Imperial at the legacy voice-path builder's race lookup for a
+   Sheogorath player only (0.5.2). The ESP preserves original shared `VNAM`,
+   restoring Sheogorath, the gate voice and Jyggalag's voice NPCs. One call
+   at RVA `0x698CCCB` is redirected through a private near relay; its bytes
+   and both native callee entries are checked before patching. The original
+   actor race getter still runs for every speaker. No race pointer or race
+   record is modified. See `docs/findings/2026-09-05-sheogorath-npc-voice.md`.
 
 As a UNBSE add-on it:
 

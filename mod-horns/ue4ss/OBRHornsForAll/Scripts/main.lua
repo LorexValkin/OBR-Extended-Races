@@ -71,3 +71,13 @@ if registered then
 else
     log("FAILED to hook UpdateCustomisationTarget; the Horns row will not apply")
 end
+
+-- Keep positioning optional to the selection hook: an offset-module error
+-- must not prevent the existing Horns row from working.
+local offsetsLoaded, offsetsError = pcall(function()
+    local source = debug.getinfo(1, "S").source
+    local directory = source:match("^@(.+[/\\])")
+    assert(directory, "cannot resolve the mod's Scripts directory")
+    require("horn_offsets").start(directory, log)
+end)
+if not offsetsLoaded then log("offset system FAILED to start: %s", tostring(offsetsError)) end

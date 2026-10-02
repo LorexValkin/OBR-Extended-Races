@@ -1,0 +1,1 @@
+Exact private authoring source for the installed playable test candidate. See ../../../docs/2026-10-01-playable-skeleton-test.md and the retained workspace delivery.json. This module is editor-only; do not install it into the game.

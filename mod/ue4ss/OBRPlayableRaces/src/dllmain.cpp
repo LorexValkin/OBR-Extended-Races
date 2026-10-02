@@ -1,6 +1,6 @@
 // OBR Playable Races (Extended Races)
 //
-// Three writes into the running executable, none of which content can make:
+// Runtime fixes that cannot be scoped correctly through shared content:
 //
 //  1. The character-creation Confirm handler looks the selected RaceName up
 //     in a TMap<FString,int32> compiled into the executable and dereferences
@@ -15,6 +15,8 @@
 //     pairing override is a stub - so both are checked from the engine tick:
 //     every half second, plus immediately after a map load and the first time
 //     a race condition is evaluated for the player (which follows Confirm).
+//  4. Only the voice-path builder sees a Sheogorath player's race as Imperial.
+//     The shared race keeps its original voice, so Sheogorath NPCs can speak.
 //
 // This is a UNBSE add-on. It registers with the UNBSE host, declaring that it
 // reads and writes the running executable, verifies the executable's identity
@@ -43,20 +45,22 @@
 
 #include <DynamicOutput/DynamicOutput.hpp>
 #include <Mod/CppUserModBase.hpp>
+#include <Unreal/FMemory.hpp>
 #include <Unreal/Hooks/Hooks.hpp>
 
 #include <UNBSEAddonHostV1.h>
 #include <UNBSEMessagingV1.h>
 #include <UNBSERelocationV1.h>
 #include <UNBSERuntimeInfoV1.h>
+#include "PlayerVoiceRace.hpp"
 
 using namespace RC;
 
 namespace
 {
-    constexpr auto ModVersionString = STR("0.5.0");
+    constexpr auto ModVersionString = STR("0.5.2");
     constexpr auto AddonId = "obr.playable-races";
-    constexpr auto AddonVersion = "0.5.0";
+    constexpr auto AddonVersion = "0.5.2";
     constexpr auto ScriptNamespace = "obr_playable_races";
 
     // OblivionRemastered-Win64-Shipping.exe 1.512.105: PE link timestamp and
@@ -186,6 +190,7 @@ namespace
     std::atomic<int> g_RuntimeState{StatePending};   // executable identity
     std::atomic<int> g_MapState{StatePending};
     std::atomic<int> g_AliasState{StatePending};
+    std::atomic<bool> g_PlayerVoiceReported{false};
     std::atomic<int> g_VoiceFlag{-1};                 // -1 unknown
     std::atomic<int> g_FactionMember{-1};             // -1 unknown
     std::atomic<int> g_HostState{0};                  // 0 absent, 1 verified, 2 unverified attempt
@@ -512,6 +517,140 @@ namespace
     }
 
     // ---------------------------------------------------------------------
+    // Measured with Binary Ninja and checked independently against retail PE
+    // bytes: response path builder 0x698CB00 calls Actor::GetRace at 0x698CCCB,
+    // then applies TESRace's VNAM donor at 0x698CCDF. Replace only the first
+    // call; every other gameplay GetRace call and every NPC result is intact.
+    constexpr uintptr_t VoiceRaceCallRva = 0x0698CCCB;
+    constexpr uintptr_t GetActorRaceRva = 0x065B2620;
+    constexpr uintptr_t LookupFormRva = 0x066114B0;
+    constexpr std::array<uint8_t, 5> OriginalVoiceCall{0xE8, 0x50, 0x59, 0xC2, 0xFF};
+    using FGetActorRace = void* (*)(void*);
+    FGetActorRace g_GetActorRace{};
+    PlayerVoiceRace::LookupForm g_LookupForm{};
+    uint8_t* g_VoiceCall{};
+    std::array<uint8_t, 5> g_PatchedVoiceCall{};
+
+    auto GetPlayerVoiceRace(void* speaker) -> void*
+    {
+        void* race = g_GetActorRace(speaker);
+        void* voice = PlayerVoiceRace::Select(speaker, g_PlayerPointer ? *g_PlayerPointer : nullptr,
+                                             race, g_LookupForm);
+        if (voice != race && !g_PlayerVoiceReported.exchange(true))
+        {
+            Log(STR("Sheogorath player voice path redirected to Imperial"));
+        }
+        return voice;
+    }
+
+    auto InstallPlayerVoiceRace() -> void
+    {
+        const auto site = Resolve(VoiceRaceCallRva, 17);
+        const auto getRace = Resolve(GetActorRaceRva, 16);
+        const auto lookup = Resolve(LookupFormRva, 16);
+        const auto player = Resolve(PlayerPointerRva, sizeof(void*));
+        // Verify both the call and surrounding control flow, plus the exact
+        // entry bytes of both callees before executing or redirecting either.
+        constexpr uint8_t callProbe[]{0xE8, 0x50, 0x59, 0xC2, 0xFF, 0x48, 0x85, 0xC0,
+                                      0x0F, 0x84, 0xE9, 0x01, 0x00, 0x00, 0x41, 0x8B, 0xD4};
+        constexpr uint8_t raceProbe[]{0x40, 0x53, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B,
+                                      0xD9, 0xE8, 0x92, 0x03, 0xFD, 0xFF, 0x84, 0xC0};
+        constexpr uint8_t lookupProbe[]{0x48, 0x89, 0x5C, 0x24, 0x08, 0x57, 0x48, 0x83,
+                                        0xEC, 0x20, 0x48, 0x8B, 0x05, 0x7F, 0xA0, 0x99};
+        if (!site || !getRace || !lookup || !player ||
+            std::memcmp(reinterpret_cast<void*>(site), callProbe, sizeof(callProbe)) ||
+            std::memcmp(reinterpret_cast<void*>(getRace), raceProbe, sizeof(raceProbe)) ||
+            std::memcmp(reinterpret_cast<void*>(lookup), lookupProbe, sizeof(lookupProbe)))
+        {
+            LogError(STR("player voice call/callees did not verify; NOT installing Imperial fallback"));
+            return;
+        }
+
+        // A five-byte CALL requires a relay within signed rel32 reach. Allocate
+        // a private page, never overwrite an executable code cave. The relay is
+        // a register-preserving JMP [RIP+0] followed by the full hook address.
+        SYSTEM_INFO info{};
+        GetSystemInfo(&info);
+        const uintptr_t step = info.dwAllocationGranularity;
+        const uintptr_t center = site & ~(step - 1);
+        void* relay = nullptr;
+        for (uintptr_t distance = step; distance < 0x70000000 && !relay; distance += step)
+        {
+            for (const uintptr_t candidate : {center + distance, center > distance ? center - distance : 0})
+            {
+                if (!candidate) { continue; }
+                MEMORY_BASIC_INFORMATION region{};
+                if (!VirtualQuery(reinterpret_cast<void*>(candidate), &region, sizeof(region)) ||
+                    region.State != MEM_FREE) { continue; }
+                relay = VirtualAlloc(reinterpret_cast<void*>(candidate), 0x1000,
+                                     MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+                if (relay) { break; }
+            }
+        }
+        if (!relay)
+        {
+            LogError(STR("no near relay available; NOT installing player voice fallback"));
+            return;
+        }
+        uint8_t jump[14]{0xFF, 0x25, 0, 0, 0, 0};
+        const auto destination = reinterpret_cast<uintptr_t>(&GetPlayerVoiceRace);
+        std::memcpy(jump + 6, &destination, sizeof(destination));
+        std::memcpy(relay, jump, sizeof(jump));
+        DWORD previous{};
+        if (!VirtualProtect(relay, 0x1000, PAGE_EXECUTE_READ, &previous) ||
+            !FlushInstructionCache(GetCurrentProcess(), relay, sizeof(jump)))
+        {
+            VirtualFree(relay, 0, MEM_RELEASE);
+            LogError(STR("could not prepare player voice relay"));
+            return;
+        }
+        const auto displacement64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(relay)) -
+                                    static_cast<int64_t>(site + 5);
+        if (displacement64 < INT32_MIN || displacement64 > INT32_MAX ||
+            !VirtualProtect(reinterpret_cast<void*>(site), 5, PAGE_EXECUTE_READWRITE, &previous))
+        {
+            VirtualFree(relay, 0, MEM_RELEASE);
+            LogError(STR("could not redirect player voice call"));
+            return;
+        }
+        g_GetActorRace = reinterpret_cast<FGetActorRace>(getRace);
+        g_LookupForm = reinterpret_cast<PlayerVoiceRace::LookupForm>(lookup);
+        g_PlayerPointer = reinterpret_cast<void**>(player);
+        g_VoiceCall = reinterpret_cast<uint8_t*>(site);
+        g_PatchedVoiceCall[0] = 0xE8;
+        const auto displacement = static_cast<int32_t>(displacement64);
+        std::memcpy(g_PatchedVoiceCall.data() + 1, &displacement, sizeof(displacement));
+        std::memcpy(g_VoiceCall, g_PatchedVoiceCall.data(), g_PatchedVoiceCall.size());
+        DWORD unused{};
+        const bool protectedAgain = VirtualProtect(g_VoiceCall, 5, previous, &unused) != 0;
+        const bool flushed = FlushInstructionCache(GetCurrentProcess(), g_VoiceCall, 5) != 0;
+        if (!protectedAgain || !flushed)
+        {
+            LogError(STR("player voice call written but protection/cache finalization failed"));
+            return;
+        }
+        // The tiny relay stays allocated for the process lifetime. It must not
+        // be freed underneath a chained hook owned by another mod at shutdown.
+        Log(STR("Sheogorath voice fallback: Imperial for player only; NPC voice unchanged"));
+    }
+
+    auto RestorePlayerVoiceCall() -> void
+    {
+        if (!g_VoiceCall || std::memcmp(g_VoiceCall, g_PatchedVoiceCall.data(), 5)) { return; }
+        DWORD previous{};
+        if (!VirtualProtect(g_VoiceCall, 5, PAGE_EXECUTE_READWRITE, &previous))
+        {
+            LogError(STR("could not restore player voice call on shutdown"));
+            return;
+        }
+        std::memcpy(g_VoiceCall, OriginalVoiceCall.data(), OriginalVoiceCall.size());
+        DWORD unused{};
+        VirtualProtect(g_VoiceCall, 5, previous, &unused);
+        FlushInstructionCache(GetCurrentProcess(), g_VoiceCall, 5);
+        g_VoiceCall = nullptr;
+    }
+
+    // ---------------------------------------------------------------------
     // AltVoiceFaction membership for a female Dremora player. The engine
     // derives an actor's alt-voice flag (+0x228) from a faction whose display
     // name contains "AltVoiceFaction", and files her combat lines under the
@@ -733,8 +872,29 @@ namespace
 
         const auto total = static_cast<int32_t>(RaceTable.size());
 
+        // The map is a static whose destructor runs from the executable's
+        // atexit table and frees the element array, the hash buckets and every
+        // key string through the game's allocator. Everything placed in the map
+        // therefore comes from that allocator, and the buffers being replaced
+        // go back to it. Memory from this DLL's heap or literals in its image
+        // would be freed by FMallocBinned2 at exit and crash every quit.
+        if (!Unreal::GMalloc || !*Unreal::GMalloc)
+        {
+            LogError(STR("game allocator not available yet; retrying"));
+            return false;
+        }
+        auto* gameMalloc = *Unreal::GMalloc;
+        const auto gameAlloc = [gameMalloc](size_t bytes) -> void* {
+            void* block = gameMalloc->Malloc(bytes, 16);
+            if (block) { std::memset(block, 0, bytes); }
+            return block;
+        };
+        const auto gameFree = [gameMalloc](const void* block) {
+            if (block) { gameMalloc->Free(const_cast<void*>(block)); }
+        };
+
         auto* elements = static_cast<FRaceIdElement*>(
-                std::calloc(static_cast<size_t>(total), sizeof(FRaceIdElement)));
+                gameAlloc(static_cast<size_t>(total) * sizeof(FRaceIdElement)));
         if (!elements)
         {
             g_MapState.store(StateRefused);
@@ -746,7 +906,17 @@ namespace
         {
             auto& element = elements[i];
             const auto length = static_cast<int32_t>(std::wcslen(RaceTable[i].Name));
-            element.Key = RaceTable[i].Name;  // static storage, outlives the process
+            auto* key = static_cast<wchar_t*>(gameAlloc(static_cast<size_t>(length + 1) * sizeof(wchar_t)));
+            if (!key)
+            {
+                g_MapState.store(StateRefused);
+                LogError(STR("key allocation failed"));
+                for (int32_t j = 0; j < i; ++j) { gameFree(elements[j].Key); }
+                gameFree(elements);
+                return true;
+            }
+            std::memcpy(key, RaceTable[i].Name, static_cast<size_t>(length + 1) * sizeof(wchar_t));
+            element.Key = key;
             element.KeyNum = length + 1;
             element.KeyMax = length + 1;
             element.Value = RaceTable[i].RaceId;
@@ -754,13 +924,13 @@ namespace
 
         int32_t hashSize = map.HashSize();
         while (hashSize < total * 2) { hashSize *= 2; }
-        auto* hash =
-                static_cast<int32_t*>(std::malloc(static_cast<size_t>(hashSize) * sizeof(int32_t)));
+        auto* hash = static_cast<int32_t*>(gameAlloc(static_cast<size_t>(hashSize) * sizeof(int32_t)));
         if (!hash)
         {
             g_MapState.store(StateRefused);
             LogError(STR("hash allocation failed"));
-            std::free(elements);
+            for (int32_t j = 0; j < total; ++j) { gameFree(elements[j].Key); }
+            gameFree(elements);
             return true;
         }
         for (int32_t i = 0; i < hashSize; ++i) { hash[i] = -1; }
@@ -772,6 +942,15 @@ namespace
             element.HashIndex = bucket;
             element.HashNextId = hash[bucket];
             hash[bucket] = i;
+        }
+
+        // Return the buffers being replaced to the allocator that owns them.
+        {
+            auto* oldElements = map.Elements();
+            const auto oldCount = map.ArrayNum();
+            for (int32_t i = 0; oldElements && i < oldCount; ++i) { gameFree(oldElements[i].Key); }
+            gameFree(oldElements);
+            gameFree(map.HashSecondary());
         }
 
         map.Elements() = elements;
@@ -847,6 +1026,7 @@ class OBRPlayableRaces : public CppUserModBase
 
     ~OBRPlayableRaces() override
     {
+        RestorePlayerVoiceCall();
         if (m_tick != Unreal::Hook::ERROR_ID) { Unreal::Hook::UnregisterCallback(m_tick); }
         if (m_loadMap != Unreal::Hook::ERROR_ID) { Unreal::Hook::UnregisterCallback(m_loadMap); }
         if (g_Link.Registered && g_Link.Host.retireAddon)
@@ -1062,6 +1242,7 @@ class OBRPlayableRaces : public CppUserModBase
                 return;
             }
             InstallRaceConditionAlias();
+            InstallPlayerVoiceRace();
             m_done = true;
             RequestVoiceCheck(STR("startup"));
         }

@@ -16,7 +16,7 @@ Built against [b]Oblivion Remastered 1.512.105[/b].
 
 [b]Horns.[/b] Dremora get a [b]Horns[/b] row in the character creator, above Hair Style, with four horn sets and "None". Horns sit in a head slot of their own, so you keep your hairstyle, beard and moustache.
 
-[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear. The Isles races' lines are locked behind a faction no player can join, and female Dremora's are filed under a voice folder the player never gets. This mod points each race at its own recordings. Sheogorath has no combat recordings at all, so he borrows Imperial's the same way the shipped Dark Elves borrow High Elf's.
+[b]They fight with their own voices.[/b] Dremora, Dark Seducer and Golden Saint each have real, recorded hit and power-attack lines that vanilla never lets you hear. The Isles races' lines are locked behind a faction no player can join, and female Dremora's are filed under a voice folder the player never gets. This mod points each race at its own recordings. A Sheogorath player borrows Imperial's combat voice through a player-only override; Sheogorath NPCs keep their original dialogue voice.
 
 [b]First person works.[/b] These races were never meant to be seen from the inside. Their skin materials were missing the game's first-person clipping fix and two of the bodies cull at the camera, so near a wall your gauntlets would drift off your hands and the hands would vanish into the wall. Both are handled at runtime; the arms keep the race's own skin.
 
@@ -39,7 +39,8 @@ You do not install UE4SS separately. UNBSE ships its own UE4SS inside the packag
   Content\Paks\~mods\zz_ExtendedRaces_P.pak   (+ .ucas, .utoc; all three are required)
   Binaries\Win64\ue4ss\Mods\OBRPlayableRaces\
   Binaries\Win64\ue4ss\Mods\OBRDremoraHorns\
-  Binaries\Win64\ue4ss\Mods\OBRFirstPersonSkin\[/code]
+  Binaries\Win64\ue4ss\Mods\OBRFirstPersonSkin\
+  Binaries\Win64\ue4ss\Mods\OBRBodyGuard\[/code]
 
 Then add the plugin to your load order. In [b]OblivionRemastered\Content\Dev\ObvData\Data\Plugins.txt[/b], put
 
@@ -47,11 +48,11 @@ Then add the plugin to your load order. In [b]OblivionRemastered\Content\Dev\Obv
 
 [b]after AltarESPMain.esp[/b] (and any other Altar*.esp). That is not optional: AltarESPMain.esp overrides 14 of the 15 race records itself, so a plugin loading before it silently loses.
 
-UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-settings.ini, ue4ss\Mods\UNBSE\, ue4ss\Mods\UNBSEOBSE64Interop\). The three mods here ship an [b]enabled.txt[/b], so they start automatically; you do not need to edit mods.txt. UNBSE's UE4SS-settings.ini has every key these mods need. If you keep your own, these must stay on under [Hooks]: HookEngineTick (OBRPlayableRaces runs entirely off the engine tick), HookLoadMap, HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
+UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-settings.ini, ue4ss\Mods\UNBSE\, ue4ss\Mods\UNBSEOBSE64Interop\). The four mods here ship an [b]enabled.txt[/b], so they start automatically; you do not need to edit mods.txt. UNBSE's UE4SS-settings.ini has every key these mods need. If you keep your own, these must stay on under [Hooks]: HookEngineTick (OBRPlayableRaces runs entirely off the engine tick), HookLoadMap, HookProcessInternal, HookProcessLocalScriptFunction, HookUObjectProcessEvent.
 
 [b]Do not swap in another UE4SS.[/b] Not the Nexus "UE4SS for OblivionRemastered" package (v3.0.1-394-g437a8ff) and not the GitHub "v3.0.1" zip. A C++ mod is tied to the UE4SS build it was compiled against: on either of those the Lua mods start, but UE4SS refuses OBRPlayableRaces with [i]Failed to load dll ... error code: 0x7f[/i], after which confirming a character crashes. If you already have the Nexus UE4SS installed for other mods, UNBSE's UE4SS.dll replaces it (in Vortex, let UNBSE win the conflict). Lua mods written for the Nexus build generally keep working under it; C++ mods compiled for it will not load, which is the same rule seen from the other side.
 
-[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.0 (... verified ...)[/i], then [i]executable identity ... - OblivionRemastered-Win64-Shipping 1.512.105[/i], then [i]rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If the last line is missing, the mod did not do its work. Do not create a character, it will crash. If the identity line says [i]NOT the build this mod was measured against; doing nothing[/i], your executable is not 1.512.105 and the mod has deliberately stood down.
+[b]Checking it worked:[/b] Binaries\Win64\ue4ss\UE4SS.log will contain [i][OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.2 (... verified ...)[/i], then [i]executable identity ... - OblivionRemastered-Win64-Shipping 1.512.105[/i], then [i]rebuilt with 14 entries, hashSize=32; all re-verified[/i]. If the last line is missing, the mod did not do its work. Do not create a character, it will crash. If the identity line says [i]NOT the build this mod was measured against; doing nothing[/i], your executable is not 1.512.105 and the mod has deliberately stood down.
 
 [size=4][b]Saves[/b][/size]
 
@@ -69,14 +70,16 @@ UNBSE's own files sit beside these (dwmapi.dll, ue4ss\UE4SS.dll, ue4ss\UE4SS-set
 [*][b]Dremora female and Sheogorath have fixed faces.[/b] Their head meshes ship without the face-morph curve set, so the game itself cannot pose them. Nothing short of new head art changes that.
 [*][b]Dremora female gets one horn set.[/b] Only one of the shipped horn meshes is skinned to the female head; the other three are male-only.
 [*][b]Nobody reacts to you as a Dremora.[/b] Race-specific lines for these races don't exist; you get Imperial's. Your own race's lines still play wherever any exist.
-[*][b]Sheogorath fights with Imperial's voice.[/b] No hit or power-attack recording of him exists in the game, so his race is pointed at Imperial's.
+[*][b]A Sheogorath player fights with Imperial's voice.[/b] No hit or power-attack recording of him exists in the game. The fallback applies only to the player's voice path, so NPC dialogue retains Sheogorath's original voice.
 [*][b]Another mod that makes further races playable will break the numbering.[/b] Race ids are positions in the alphabetical playable list. That shows up as the wrong race being applied, not a crash.
 [*][b]Horn menu tiles borrow Argonian icons.[/b] The shipped horn art has no menu portraits.
 [/list]
 
 [size=4][b]Compatibility[/b][/size]
 
-The plugin overrides the four RACE records, three Dremora HAIR records, three EYES records, and the combat-dialogue quests Generic, GenericFodderCombat, GenericDremora and SENQDGeneric plus 15 of SENQDGeneric's combat INFOs. Anything else that edits those records will conflict in the usual load-order way. The pak adds rows and new assets only; it overrides no shipped package. The UE4SS mods touch the player only.
+The plugin overrides the four RACE records, three Dremora HAIR records, three EYES records, and the combat-dialogue quests Generic, GenericFodderCombat, GenericDremora and SENQDGeneric plus 15 of SENQDGeneric's combat INFOs. Anything else that edits those records will conflict in the usual load-order way. The pak adds rows and new assets only; it overrides no shipped package. The UE4SS mods touch the player only, except OBRBodyGuard, which watches every character of the four races.
+
+[b]Body mods.[/b] Mods that rebuild character bodies (body sliders, morphs) were written for the ten vanilla races and have no body data for these four; measured with NaturalBodyMorph, its rebuild leaves a male Dremora's skin slot holding a dead material and the body renders untextured. The bundled [b]OBRBodyGuard[/b] mod repairs exactly that: it checks the four races' bodies once a second and puts the race's own body material (or mesh, should one get swapped) back. Vanilla races are never touched, so your body mod keeps working everywhere it has data. You do not need to configure anything; if you see a body lose its texture, check UE4SS.log for [i][BodyGuard][/i] lines.
 
 [size=4][b]Credits[/b][/size]
 

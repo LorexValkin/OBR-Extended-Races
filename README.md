@@ -28,7 +28,8 @@ faction membership selects. This plugin points each race at its own recordings,
 keeps the generic playable-race grunts (which have no audio for these races)
 out of their selection pool, and the UE4SS mod keeps a female Dremora on her
 alt-voice recordings. Sheogorath has no combat recordings at all, so he borrows
-Imperial's the same way the shipped Dark Elves borrow High Elf's.
+Imperial's through a player-only voice-path override. Sheogorath NPCs retain
+their original dialogue voice, including the talking menu and scripted voices.
 
 ## Install
 
@@ -44,6 +45,7 @@ OblivionRemastered\
   Binaries\Win64\ue4ss\Mods\OBRPlayableRaces\
   Binaries\Win64\ue4ss\Mods\OBRDremoraHorns\
   Binaries\Win64\ue4ss\Mods\OBRFirstPersonSkin\
+  Binaries\Win64\ue4ss\Mods\OBRBodyGuard\
 ```
 
 Then add the plugin to your load order. In
@@ -83,6 +85,15 @@ floating off the hand, the hand vanishing into the wall. The mod moves the
 first-person arms onto the retail first-person skin material with the race's
 own textures and tint copied across.
 
+`OBRBodyGuard` defends the four races' bodies against third-party body mods.
+Body mods rebuild character bodies through their own rigs, none of which know
+these races; measured with NaturalBodyMorph, the rebuild leaves a male
+Dremora's skin slot holding a garbage-collected material and the body renders
+untextured. The guard polls once a second and puts the race's own body
+material (or, should a mod swap the mesh itself, the recorded mesh) back.
+Vanilla races are never touched, so the body mod keeps working everywhere it
+has data.
+
 **UNBSE 0.11.0-rc.1 — required.** `OBRPlayableRaces` is a UNBSE add-on, and
 UNBSE (the Unblivion Script Extender, https://github.com/LorexValkin/UNBSE) is
 where the UE4SS runtime these mods are built against comes from: RE-UE4SS
@@ -105,9 +116,10 @@ Binaries\Win64\
     Mods\OBRPlayableRaces\     <- required; without it the game crashes
     Mods\OBRDremoraHorns\      <- the Dremora Horns row
     Mods\OBRFirstPersonSkin\   <- first-person arms near walls
+    Mods\OBRBodyGuard\         <- keeps body mods off the four races' skin
 ```
 
-All three of ours ship an `enabled.txt`, so UE4SS starts them automatically —
+All four of ours ship an `enabled.txt`, so UE4SS starts them automatically —
 you do **not** need to edit `mods.txt`.
 
 UNBSE's `UE4SS-settings.ini` has the keys these mods need. If you keep your own,
@@ -159,13 +171,15 @@ missing any one of them will not mount, silently.
 `Binaries\Win64\ue4ss\UE4SS.log` will contain:
 
 ```
-[UNBSE.Addon] {"schema":"UNBSE.AddonCompatibility",...,"addonId":"obr.playable-races","version":"0.5.0","status":"verified",...}
-[OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.0 (owner 2, verified; relocation on, messaging on, script status on)
+[UNBSE.Addon] {"schema":"UNBSE.AddonCompatibility",...,"addonId":"obr.playable-races","version":"0.5.2","status":"verified",...}
+[OBRPlayableRaces] registered with UNBSE as obr.playable-races 0.5.2 (owner 2, verified; relocation on, messaging on, script status on)
 [OBRPlayableRaces] executable identity via UNBSE runtime-info v1: timestamp 0xF19077A4, image 0x09E1E000 at 0x... - OblivionRemastered-Win64-Shipping 1.512.105; host 0.11.0-rc.1 on ue4ss-3.0.1-beta0-68dd45cb-unbse-patchset-v1-mod-0.11.0-rc.1
 [OBRPlayableRaces] rebuilt with 14 entries, hashSize=32; all re-verified
 [OBRPlayableRaces] race conditions aliased to Imperial for the four added races (player only)
+[OBRPlayableRaces] Sheogorath voice fallback: Imperial for player only; NPC voice unchanged
 [DremoraHorns] loaded - Horns row enabled for Dremora
 [FPSkin] loaded - poll on
+[BodyGuard] loaded - poll on
 ```
 
 If the identity line ends in `NOT the build this mod was measured against;
@@ -257,9 +271,10 @@ entirely. Change race before uninstalling, or keep a save from before.
   the game name Imperial and none names these four for the player. It is what
   makes the tutorial completable at all. Your own race's lines still work where
   any exist; Imperial's are added, not substituted.
-- **Sheogorath fights with Imperial's voice.** No hit or power-attack
-  recording of him exists anywhere in the game, so his race is pointed at
-  Imperial's, the way the shipped Dark Elves are pointed at High Elf's.
+- **A Sheogorath player fights with Imperial's voice.** No hit or power-attack
+  recording of him exists anywhere in the game. `OBRPlayableRaces` supplies
+  Imperial only when building that player's voice path; the shared race's
+  voice assignment remains original so the NPC can speak normally.
   Dark Seducer, Golden Saint and Dremora use their own recordings.
 - **Another mod that makes further races playable will break the numbering.**
   `RaceId` counts positions in the alphabetical playable list, so anything that
