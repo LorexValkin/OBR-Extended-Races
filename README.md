@@ -7,6 +7,26 @@ Built against **Oblivion Remastered 1.512.105**.
 
 ---
 
+## Unblivion edition
+
+The current build runs on **Unblivion** instead of UE4SS and UNBSE. Copy `mod/unblivion/Extended Races` into
+`Unblivion\Mods\` and start the game.
+
+What Unblivion does with it:
+- sets up the plugins and paks;
+- keeps the plugins in load order;
+- adds the races to character creation itself, numbered the way the game numbers them, so other race mods
+  can sit beside this one.
+
+It needs Unblivion and the Unblivion Mod Loader. This edition was verified in game on 2 October 2026.
+- `mod/unblivion/SOURCE.md` lists every file and the build it came from.
+- What the edition covers, and what is still open (the playable Skeleton's checks, for one), is in
+  `docs/2026-10-01-*.md`.
+
+The sections below describe the UE4SS edition (1.0 on Nexus).
+
+---
+
 ## What you get
 
 | race | sexes | face sliders |

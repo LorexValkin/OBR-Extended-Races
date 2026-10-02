@@ -1,0 +1,17 @@
+RequiredPlugin=ExtendedRaces.esp
+RequiredPlugin=ExtendedRacesSkeleton.esp
+Race=0|Argonian
+Race=1|Breton
+Race=2|Dark Elf
+Race=3|Dark Seducer
+Race=4|Dremora
+Race=5|Golden Saint
+Race=6|High Elf
+Race=7|Imperial
+Race=8|Khajiit
+Race=9|Nord
+Race=10|Orc
+Race=11|Redguard
+Race=12|Sheogorath
+Race=13|Wood Elf
+Race=14|Skeleton
