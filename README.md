@@ -23,6 +23,11 @@ It needs Unblivion and the Unblivion Mod Loader. This edition was verified in ga
 - What the edition covers, and what is still open (the playable Skeleton's checks, for one), is in
   `docs/2026-10-01-*.md`.
 
+**Why it needs native code at all:** almost everything here is content (the ESP, paks and Blueprints). One step
+isn't. Confirming a character of an added race goes through a ten-race table compiled into the game, which no pak,
+ESP or Blueprint can reach. The evidence, step by step, is in
+[docs/2026-10-03-what-needs-native-code.md](docs/2026-10-03-what-needs-native-code.md).
+
 The sections below describe the UE4SS edition (1.0 on Nexus).
 
 ---
